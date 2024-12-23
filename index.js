@@ -173,7 +173,7 @@ builder.defineMetaHandler(async (args) => {
 });
 
 
-
-// Serve the add-on
-serveHTTP(builder.getInterface(), { port: 8180 });
+module.exports = (req, res) => {
+  serveHTTP(getInterface(), { req, res });
+};
 
