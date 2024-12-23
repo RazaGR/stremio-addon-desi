@@ -174,6 +174,6 @@ builder.defineMetaHandler(async (args) => {
 
 
 module.exports = (req, res) => {
-  serveHTTP(getInterface(), { req, res });
+  serveHTTP(builder.getInterface(), { req, res });
 };
 
