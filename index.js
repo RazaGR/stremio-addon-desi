@@ -5,8 +5,8 @@ const nameToImdb = require("name-to-imdb");
 
 
 const BASE_URLS = {
-  punjabi: "https://desicinemas.tv/category/punjabi/",
-  hindiDubbed: "https://desicinemas.tv/category/hindi-dubbed/",
+  punjabi: "https://desicinemas.to/category/punjabi/",
+  hindiDubbed: "https://desicinemas.to/category/hindi-dubbed/",
 };
 
 async function fetchMovies(url) {
@@ -61,7 +61,7 @@ const manifest = {
   id: "com.stremio.desicinemas",
   version: "1.0.1",
   name: "DesiCinemas Movies",
-  description: "Shows movies from DesiCinemas.tv (Punjabi and Hindi Dubbed)",
+  description: "Shows movies from DesiCinemas.to (Punjabi and Hindi Dubbed)",
   resources: ["catalog", "meta"],
   types: ["movie"],
   catalogs: [
@@ -173,7 +173,7 @@ builder.defineMetaHandler(async (args) => {
 });
 
 
-module.exports = (req, res) => {
-  serveHTTP(builder.getInterface(), { req, res });
-};
+
+// Serve the add-on
+serveHTTP(builder.getInterface(), { port: 8180 });
 
