@@ -5,8 +5,9 @@ const nameToImdb = require("name-to-imdb");
 
 
 const BASE_URLS = {
-  punjabi: "https://desicinemas.to/category/punjabi/",
-  hindiDubbed: "https://desicinemas.to/category/hindi-dubbed/",
+  punjabi: "https://desicinemas.to/category/punjabi-movies/",
+  hindiDubbed: "https://desicinemas.to/category/hindi-dubbed-movies/",
+  hindi: "https://desicinemas.to/category/bollywood-movies/",
 };
 
 async function fetchMovies(url) {
@@ -15,6 +16,7 @@ async function fetchMovies(url) {
     const $ = cheerio.load(data);
 
     const movies = [];
+    let totalPages = 11; // Default to 1 page
 
     $("main ul.MovieList li").each((index, element) => {
       let title = $(element).find(".Title").first().text().trim(); // Movie title
@@ -87,6 +89,17 @@ const manifest = {
         }
       ]
     },
+    {
+      type: "movie",
+      id: "desicinemas-hindi",
+      name: "Hindi Movies",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
   ],
 };
 
@@ -97,7 +110,9 @@ const ITEMS_PER_PAGE = 29; // Define how many items you have per page
 const totalPagesCache = {
   punjabi: 1,
   hindiDubbed: 1,
+  hindi: 1,
 };
+
 
 // Catalog resource
 builder.defineCatalogHandler(async (args) => {
@@ -112,7 +127,7 @@ builder.defineCatalogHandler(async (args) => {
       if (pageNumber > totalPagesCache.punjabi) {
         return { metas: [] };
       }
-      const url = pageNumber === 1 ? BASE_URLS.punjabi : `${BASE_URLS.punjabi}page/${pageNumber}/`;
+      const url = pageNumber === 2 ? BASE_URLS.punjabi : `${BASE_URLS.punjabi}page/${pageNumber}/`;
       const result = await fetchMovies(url);
       movies = result.movies;
 
@@ -125,13 +140,26 @@ builder.defineCatalogHandler(async (args) => {
       if (pageNumber > totalPagesCache.hindiDubbed) {
         return { metas: [] };
       }
-      const url = pageNumber === 1 ? BASE_URLS.hindiDubbed : `${BASE_URLS.hindiDubbed}page/${pageNumber}/`;
+      const url = pageNumber === 2 ? BASE_URLS.hindiDubbed : `${BASE_URLS.hindiDubbed}page/${pageNumber}/`;
       const result = await fetchMovies(url);
       movies = result.movies;
 
       // Update cache with the latest total pages
       if (result.totalPages) {
         totalPagesCache.hindiDubbed = result.totalPages;
+      }
+    } else if (args.id === "desicinemas-hindi") {
+      // Check if skip exceeds cached total pages
+      if (pageNumber > totalPagesCache.hindi) {
+        return { metas: [] };
+      }
+      const url = pageNumber === 2 ? BASE_URLS.hindi : `${BASE_URLS.hindi}page/${pageNumber}/`;
+      const result = await fetchMovies(url);
+      movies = result.movies;
+
+      // Update cache with the latest total pages
+      if (result.totalPages) {
+        totalPagesCache.hindi = result.totalPages;
       }
     }
 
