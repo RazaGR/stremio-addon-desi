@@ -61,7 +61,7 @@ async function fetchMovies(url) {
 // Define Stremio Add-on
 const manifest = {
   id: "com.stremio.desicinemas",
-  version: "1.0.1",
+  version: "1.0.3",
   name: "DesiCinemas Movies",
   description: "Shows movies from DesiCinemas.to (Punjabi and Hindi Dubbed)",
   resources: ["catalog", "meta"],
