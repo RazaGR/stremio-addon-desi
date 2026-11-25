@@ -70,7 +70,28 @@ const CATALOGS = {
     name: "K-Dramas", type: "series", langs: ["ko"],
     discover: { with_original_language: "ko", with_genres: "18" }, // 18 = Drama
   },
+  // No source records dub audio tracks. Best proxy: K-dramas streaming in
+  // India on platforms whose K-drama catalogue is mostly Hindi dubs.
+  "desi-kdrama-hindi": {
+    name: "K-Dramas (Hindi Dubbed)", type: "series", langs: ["ko"], noSearch: true,
+    discover: { with_original_language: "ko", watch_region: "IN" },
+    providers: /minitv|mx ?player/i,
+  },
 };
+
+// Resolve TMDB watch-provider ids by name (ids aren't documented, names are stable).
+let providerIdsPromise = null;
+function getProviderIds(pattern) {
+  if (!providerIdsPromise) {
+    providerIdsPromise = tmdb("/watch/providers/tv", { watch_region: "IN" }).then((d) => {
+      if (!d) providerIdsPromise = null; // retry next time
+      return d?.results || [];
+    });
+  }
+  return providerIdsPromise.then((list) =>
+    list.filter((p) => pattern.test(p.provider_name)).map((p) => p.provider_id).join("|")
+  );
+}
 
 const SORTS = ["Latest", "Popular", "Top Rated"];
 
@@ -135,8 +156,14 @@ async function fetchCatalogPage(cat, { page, sort, search }) {
     const data = await tmdb(`/search/${kind}`, { query: search, page, include_adult: false });
     results = (data?.results || []).filter((r) => cat.langs.includes(r.original_language));
   } else {
+    const extra = {};
+    if (cat.providers) {
+      extra.with_watch_providers = await getProviderIds(cat.providers);
+      if (!extra.with_watch_providers) return [];
+    }
     const data = await tmdb(`/discover/${kind}`, {
       ...cat.discover,
+      ...extra,
       ...sortParams(cat.type, sort),
       include_adult: false,
       page,
@@ -151,7 +178,7 @@ async function fetchCatalogPage(cat, { page, sort, search }) {
 
 const manifest = {
   id: "com.stremio.desicinemas",
-  version: "2.0.0",
+  version: "2.1.0",
   name: "Desi Movies & K-Dramas",
   description: "Punjabi, Hindi and South Indian movies plus Korean dramas, powered by TMDB.",
   resources: ["catalog", { name: "meta", types: ["movie"], idPrefixes: ["tmdb:"] }],
@@ -162,7 +189,7 @@ const manifest = {
     name: c.name,
     extra: [
       { name: "skip", isRequired: false },
-      { name: "search", isRequired: false },
+      ...(c.noSearch ? [] : [{ name: "search", isRequired: false }]),
       { name: "genre", isRequired: false, options: SORTS },
     ],
   })),
