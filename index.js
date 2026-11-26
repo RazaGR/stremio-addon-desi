@@ -62,6 +62,14 @@ const CATALOGS = {
     name: "Hindi Movies", type: "movie", langs: ["hi"],
     discover: { with_original_language: "hi" },
   },
+  "desi-urdu": {
+    name: "Urdu Movies", type: "movie", langs: ["ur"],
+    discover: { with_original_language: "ur" },
+  },
+  "desi-urdu-drama": {
+    name: "Urdu Dramas", type: "series", langs: ["ur"],
+    discover: { with_original_language: "ur", with_genres: "18" }, // 18 = Drama
+  },
   "desi-hindi-dubbed": {
     name: "Hindi Dubbed (South) Movies", type: "movie", langs: ["te", "ta", "ml", "kn"],
     discover: { with_original_language: "te|ta|ml|kn" },
@@ -178,9 +186,9 @@ async function fetchCatalogPage(cat, { page, sort, search }) {
 
 const manifest = {
   id: "com.stremio.desicinemas",
-  version: "2.1.0",
+  version: "2.2.0",
   name: "Desi Movies & K-Dramas",
-  description: "Punjabi, Hindi and South Indian movies plus Korean dramas, powered by TMDB.",
+  description: "Punjabi, Hindi, Urdu and South Indian movies plus Urdu and Korean dramas, powered by TMDB.",
   resources: ["catalog", { name: "meta", types: ["movie"], idPrefixes: ["tmdb:"] }],
   types: ["movie", "series"],
   catalogs: Object.entries(CATALOGS).map(([id, c]) => ({
